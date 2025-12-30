@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Packet Investigator | Dashboard</title>
+    <meta name="description" content="Advanced PCAP analysis and threat detection dashboard">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <div class="logo">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="url(#logo-gradient)" stroke-width="2" fill="none" />
+                        <path d="M12 20h16M20 12v16M14 14l12 12M26 14l-12 12" stroke="url(#logo-gradient)"
+                            stroke-width="1.5" stroke-linecap="round" />
+                        <circle cx="20" cy="20" r="4" fill="url(#logo-gradient)" />
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#6366f1" />
+                                <stop offset="100%" stop-color="#22d3ee" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>Network Packet Investigator</h1>
+                    <span class="version">v1.0.0</span>
+                </div>
+            </div>
+            <nav class="header-nav">
+                <button class="nav-btn active" data-view="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    Dashboard
+                </button>
+                <button class="nav-btn" data-view="findings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Findings
+                </button>
+                <button class="nav-btn" data-view="sessions">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Sessions
+                </button>
+                <button class="nav-btn" data-view="packets">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    Packets
+                </button>
+                <button class="nav-btn nav-btn-live" data-view="live">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    <span class="live-text">Live Capture</span>
+                </button>
+            </nav>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="exportBtn" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Export
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 80 80" fill="none">
+                            <circle cx="40" cy="40" r="38" stroke="url(#upload-gradient)" stroke-width="2"
+                                stroke-dasharray="8 4" />
+                            <path d="M40 24v32M28 36l12-12 12 12" stroke="url(#upload-gradient)" stroke-width="3"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <defs>
+                                <linearGradient id="upload-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#6366f1" />
+                                    <stop offset="100%" stop-color="#22d3ee" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h2>Drop your PCAP file here</h2>
+                    <p>or click to browse • Supports .pcap, .pcapng, .cap files</p>
+                    <input type="file" id="fileInput" accept=".pcap,.pcapng,.cap,.dmp,.etl" hidden>
+                    <button class="btn btn-primary" id="browseBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Choose File
+                    </button>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="progress-container hidden" id="progressContainer">
+                    <div class="progress-content">
+                        <div class="spinner">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <h3 id="progressTitle">Uploading...</h3>
+                        <p id="progressMessage">Preparing your file for analysis</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-percent" id="progressPercent">0%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard View -->
+            <section class="dashboard-view hidden" id="dashboardView">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon packets">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statPackets">0</span>
+                            <span class="stat-label">Total Packets</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon tcp">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statTcp">0</span>
+                            <span class="stat-label">TCP Packets</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon dns">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statDns">0</span>
+                            <span class="stat-label">DNS Queries</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon http">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 0 1 9-9" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statHttp">0</span>
+                            <span class="stat-label">HTTP Requests</span>
+                        </div>
+                    </div>
+                    <div class="stat-card threat-card">
+                        <div class="stat-icon threats">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statThreats">0</span>
+                            <span class="stat-label">Threats Detected</span>
+                        </div>
+                        <div class="threat-breakdown">
+                            <span class="critical"><span id="threatCritical">0</span> Critical</span>
+                            <span class="warning"><span id="threatWarning">0</span> Warning</span>
+                            <span class="info"><span id="threatInfo">0</span> Info</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <h3>Protocol Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="protocolChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <h3>Top DNS Domains</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dnsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <h3>Port Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="portsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Findings -->
+                <div class="findings-preview">
+                    <div class="card-header">
+                        <h3>Recent Findings</h3>
+                        <button class="btn btn-ghost" id="viewAllFindings">View All →</button>
+                    </div>
+                    <div class="findings-list" id="recentFindings">
+                        <div class="empty-state">
+                            <p>No findings detected</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Findings View -->
+            <section class="findings-view hidden" id="findingsView">
+                <div class="view-header">
+                    <h2>Threat Findings</h2>
+                    <div class="filter-controls">
+                        <select id="severityFilter" class="filter-select">
+                            <option value="all">All Severities</option>
+                            <option value="CRITICAL">Critical</option>
+                            <option value="WARNING">Warning</option>
+                            <option value="INFO">Info</option>
+                        </select>
+                        <input type="text" id="searchFilter" class="filter-input" placeholder="Search findings...">
+                    </div>
+                </div>
+                <div class="findings-table-container">
+                    <table class="findings-table" id="findingsTable">
+                        <thead>
+                            <tr>
+                                <th>Severity</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="findingsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sessions View -->
+            <section class="sessions-view hidden" id="sessionsView">
+                <div class="view-header">
+                    <h2>TCP Sessions</h2>
+                    <div class="session-stats">
+                        <span id="sessionCount">0 sessions</span>
+                    </div>
+                </div>
+                <div class="sessions-grid" id="sessionsGrid">
+                </div>
+            </section>
+
+            <!-- Packets View -->
+            <section class="packets-view hidden" id="packetsView">
+                <div class="view-header">
+                    <h2>Packet Contents</h2>
+                    <div class="packet-controls">
+                        <div class="packet-tabs">
+                            <button class="packet-tab active" data-packet-type="all">All Packets</button>
+                            <button class="packet-tab" data-packet-type="udp">UDP/TFTP</button>
+                            <button class="packet-tab" data-packet-type="dns">DNS</button>
+                            <button class="packet-tab" data-packet-type="http">HTTP</button>
+                            <button class="packet-tab" data-packet-type="tcp">TCP</button>
+                        </div>
+                        <div class="packet-sort-controls">
+                            <label class="sort-label">Sort by:</label>
+                            <select id="packetSortField" class="filter-select">
+                                <option value="timestamp">Timestamp</option>
+                                <option value="protocol">Protocol</option>
+                                <option value="length">Size</option>
+                            </select>
+                            <select id="packetSortOrder" class="filter-select">
+                                <option value="asc">Ascending ↑</option>
+                                <option value="desc">Descending ↓</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Raw Packets -->
+                <div class="packet-panel active" id="allPacketsPanel">
+                    <div class="packet-list" id="allPacketsList">
+                    </div>
+                    <div class="pagination-controls" id="allPacketsPagination">
+                        <button class="pagination-btn" id="allPacketsFirst" title="First Page">⏮</button>
+                        <button class="pagination-btn" id="allPacketsPrev" title="Previous">◀</button>
+                        <span class="pagination-info" id="allPacketsPageInfo">Page 1 of 1</span>
+                        <button class="pagination-btn" id="allPacketsNext" title="Next">▶</button>
+                        <button class="pagination-btn" id="allPacketsLast" title="Last Page">⏭</button>
+                        <span class="pagination-total" id="allPacketsTotal">0 packets</span>
+                    </div>
+                </div>
+
+                <!-- UDP Packets -->
+                <div class="packet-panel hidden" id="udpPacketsPanel">
+                    <div class="packet-list" id="udpPacketsList">
+                    </div>
+                </div>
+
+                <!-- DNS Packets -->
+                <div class="packet-panel hidden" id="dnsPacketsPanel">
+                    <div class="packet-list" id="dnsPacketsList">
+                    </div>
+                </div>
+
+                <!-- HTTP Packets -->
+                <div class="packet-panel hidden" id="httpPacketsPanel">
+                    <div class="packet-list" id="httpPacketsList">
+                    </div>
+                </div>
+
+                <!-- TCP Packets -->
+                <div class="packet-panel hidden" id="tcpPacketsPanel">
+                    <div class="packet-list" id="tcpPacketsList">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Capture View -->
+            <section id="liveView" class="dashboard-section hidden">
+                <div class="live-capture-container">
+                    <!-- Control Panel -->
+                    <div class="live-control-panel">
+                        <div class="live-header">
+                            <div class="live-indicator" id="liveIndicator">
+                                <span class="live-dot"></span>
+                                <span class="live-label">OFFLINE</span>
+                            </div>
+                            <h2 class="live-title">🔥 Live Packet Capture</h2>
+                        </div>
+
+                        <div class="live-controls">
+                            <div class="control-group">
+                                <label>Interface</label>
+                                <select id="interfaceSelect" class="live-select">
+                                    <option value="">Loading interfaces...</option>
+                                </select>
+                            </div>
+
+                            <div class="control-group">
+                                <label>BPF Filter</label>
+                                <input type="text" id="bpfFilter" class="live-input"
+                                    placeholder="e.g: tcp port 80, host 192.168.1.1, udp">
+                            </div>
+
+                            <div class="control-buttons">
+                                <button id="startCaptureBtn" class="live-btn live-btn-start">
+                                    <span>▶</span> Start Capture
+                                </button>
+                                <button id="pauseCaptureBtn" class="live-btn live-btn-pause" disabled>
+                                    <span>⏸</span> Pause
+                                </button>
+                                <button id="stopCaptureBtn" class="live-btn live-btn-stop" disabled>
+                                    <span>⏹</span> Stop
+                                </button>
+                                <button id="saveCaptureBtn" class="live-btn live-btn-save" disabled>
+                                    <span>💾</span> Save PCAP
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Live Stats -->
+                        <div class="live-stats-bar">
+                            <div class="live-stat">
+                                <span class="stat-value" id="livePacketCount">0</span>
+                                <span class="stat-label">Packets</span>
+                            </div>
+                            <div class="live-stat">
+                                <span class="stat-value" id="liveBytesCount">0 B</span>
+                                <span class="stat-label">Data</span>
+                            </div>
+                            <div class="live-stat">
+                                <span class="stat-value" id="livePacketsPerSec">0</span>
+                                <span class="stat-label">Packets/s</span>
+                            </div>
+                            <div class="live-stat">
+                                <span class="stat-value" id="liveDuration">00:00</span>
+                                <span class="stat-label">Duration</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Packet Table -->
+                    <div class="live-packet-table-container">
+                        <div class="live-packet-header">
+                            <span class="col-no">#</span>
+                            <span class="col-time">Time</span>
+                            <span class="col-src">Source</span>
+                            <span class="col-dst">Destination</span>
+                            <span class="col-proto">Protocol</span>
+                            <span class="col-len">Length</span>
+                            <span class="col-info">Info</span>
+                        </div>
+                        <div class="live-packet-body" id="livePacketBody">
+                            <div class="live-empty-state">
+                                <div class="terminal-text">
+                                    <span class="prompt">&gt;</span> Waiting for capture to start...
+                                    <span class="cursor">_</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Protocol Stats Mini -->
+                    <div class="live-protocol-stats" id="liveProtocolStats">
+                        <!-- Dynamically filled -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Network Packet Investigator • Built for Security Analysts</p>
+        </footer>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal hidden" id="exportModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Report</h3>
+                <button class="modal-close" id="closeExportModal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Choose export format:</p>
+                <div class="export-options">
+                    <button class="export-btn" id="exportJson">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                        JSON
+                    </button>
+                    <button class="export-btn" id="exportCsv">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="8" y1="13" x2="16" y2="13" />
+                            <line x1="8" y1="17" x2="16" y2="17" />
+                            <line x1="8" y1="9" x2="10" y2="9" />
+                        </svg>
+                        CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finding Detail Modal -->
+    <div class="modal hidden" id="findingModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="findingModalTitle">Finding Details</h3>
+                <button class="modal-close" id="closeFindingModal">×</button>
+            </div>
+            <div class="modal-body" id="findingModalBody">
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/live_capture.js"></script>
+</body>
+
+</html>
